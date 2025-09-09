@@ -1,0 +1,36 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: forum-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672" # UI http://localhost:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+    volumes:
+      - ./data/rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # UI http://localhost:8025
+    environment:
+      MP_DATABASE: /data/mailpit.db   # persist captured emails
+      # Optional retention:
+      # MP_MAX_MESSAGES: "5000"
+      # MP_MAX_AGE: "14d"
+    volumes:
+      - ./data/mailpit:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8025/health"]  # Mailpit exposes /health
+      interval: 30s
+      timeout: 5s
+      retries: 5
