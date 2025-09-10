@@ -45,7 +45,7 @@ cp .env.example .env
 ## 3) Run the Flask worker
 
 ```bash
-flask --app app worker
+flask worker
 ```
 
 * Runs until you stop it (Ctrl+C).
